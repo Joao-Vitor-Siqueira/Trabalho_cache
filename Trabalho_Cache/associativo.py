@@ -28,14 +28,37 @@ def inicializar_cache_associativa(nConjuntos):
 
 
 def imprimir_cache(cache):
-    print("Pos Cache |Posição Memória")
+    print()
     for i in range(0,len(cache)):
-        print("O conjunto atual é",(i+1))
+        print("Conjunto:",(i+1),"\n")
+        print("Pos Cache |Posição Memória")
         for key, value in cache[i].items():
             print("       ",key, "|", value)
         print("-------------------------------------------")
-        
 
-teste = inicializar_cache_associativa(2)
+def inicializar_lru(nConjuntos):
+    lru = {}
+    for i in range(0,nConjuntos):
+        lru[i] = -1
+    return lru        
 
-imprimir_cache(teste)
+def mapeamento_associativo_lru(nConjuntos,pos_memoria):
+    cache = inicializar_cache_associativa(nConjuntos)
+    print("Cache inicial")
+    print("Tamanho da Cache:",nConjuntos)
+    imprimir_cache(cache)
+    print()
+    hits = 0
+    misses = 0
+    lru = inicializar_lru(nConjuntos)
+    for i in range(0,pos_memoria):
+        print("Linha",i,"| posição de memória desejada", pos_memoria[i])
+        posCache = pos_memoria[i] % nConjuntos
+        for j in range(0,len(cache[0])):
+
+
+
+
+
+
+
