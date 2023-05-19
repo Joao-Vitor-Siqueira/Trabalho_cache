@@ -1,60 +1,93 @@
-def inicializar_cache_associativa(nConjuntos):
+import queue
+
+def inicializar_cache_associativa(nConjuntos,nBlocos):
     cache = []
-    print('---------MENU DE OPERACOES---------')
-    print('1. Numero de blocos: 1')
-    print('2. Numero de blocos: 2')
-    print('3. Numero de blocos: 4')
-    print('4. Numero de blocos: 8')
-    print('5. Numero de blocos 16')
-    op = int(input('Digite a operacao a ser escolhida: '))
-    match op:
-        case 1:
-            numeroBlocos = 1
-        case 2:
-            numeroBlocos = 2
-        case 3:
-            numeroBlocos = 4
-        case 4:
-            numeroBlocos = 8
-        case 5:
-            numeroBlocos = 16
-
-
     for i in range(0,nConjuntos):
         cache.append({})
-        for j in range(0,numeroBlocos):
+        for j in range(0,nBlocos):
            cache[i][j] = -1
     return cache
 
 
-def imprimir_cache(cache):
+def imprimir_cache(cache,fifo):
     print()
     for i in range(0,len(cache)):
-        print("Conjunto:",(i+1),"\n")
+        print("Conjunto:",(i))
+        print("Fifo: ",end="")
+        fifo[i] = imprimir_queue(fifo[i])
         print("Pos Cache |Posição Memória")
         for key, value in cache[i].items():
             print("       ",key, "|", value)
         print("-------------------------------------------")
 
-def inicializar_lru(nConjuntos):
-    lru = {}
-    for i in range(0,nConjuntos):
-        lru[i] = -1
-    return lru        
 
-def mapeamento_associativo_lru(nConjuntos,pos_memoria):
-    cache = inicializar_cache_associativa(nConjuntos)
+def imprimir_queue(q):
+    newQueue = queue.Queue()
+    print("[",end="")
+    while not q.empty():
+        item = q.get()
+        print(item,end=",")
+        newQueue.put(item)
+    print("]")
+    return newQueue
+
+def inicializar_fifo(nConjuntos):
+    fifo = []
+    for i in range(0,nConjuntos):
+        q = queue.Queue()
+        fifo.append(q)
+    return fifo
+
+
+def mapeamento_associativo_fifo(nConjuntos,nBlocos,pos_memoria):
+    cache = inicializar_cache_associativa(nConjuntos,nBlocos)
+    fifo = inicializar_fifo(nConjuntos)
     print("Cache inicial")
     print("Tamanho da Cache:",nConjuntos)
-    imprimir_cache(cache)
+    imprimir_cache(cache,fifo)
     print()
     hits = 0
     misses = 0
-    lru = inicializar_lru(nConjuntos)
-    for i in range(0,pos_memoria):
+    for i in range(0,len(pos_memoria)):
+        pos_cache = pos_memoria[i] % nConjuntos
         print("Linha",i,"| posição de memória desejada", pos_memoria[i])
-        posCache = pos_memoria[i] % nConjuntos
-        for j in range(0,len(cache[0])):
+        for j in range(0,nConjuntos):
+            if cache[pos_cache][j] == pos_memoria[i]:
+                print("Status: Hit")
+                hits += 1
+                break
+            else:
+                if -1 not in cache[pos_cache].values(): #cache cheia
+                    print("Status: Miss")
+                    misses += 1
+                    cache[pos_cache][fifo[pos_cache].get()] = pos_memoria[i]
+                    fifo[pos_cache].put(j)  
+                    break
+                elif cache[pos_cache][j] == -1: 
+                    print("Status: Miss")
+                    misses += 1
+                    cache[pos_cache][j] = pos_memoria[i]
+                    fifo[pos_cache].put(j)
+                    break
+        print("Tamanho da Cache:",nConjuntos)
+        imprimir_cache(cache,fifo)
+        print()    
+    taxa_acertos = (100 * hits) / len(pos_memoria)
+    print("Memórias acessadas:", len(pos_memoria))
+    print("Número de hits:", hits)                      
+    print("Número de misses:", misses)
+    print("Taxa de acertos (hits): ",format(taxa_acertos,".2f"),"%\n-------------------------------------------------------\n")
+            
+         
+
+mapeamento_associativo_fifo(2,2,[1,3,1,5])                                                       
+
+
+
+
+
+                
+
 
 
 
